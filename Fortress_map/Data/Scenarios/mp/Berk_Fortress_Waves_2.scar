@@ -1,0 +1,288 @@
+--=================================================================================================================================================================
+--	Script By: BERKYT
+--	Links: VK: https://vk.com/b_e_r_k_y_t Discord: https://discord.gg/amMreCC YouTube: https://www.youtube.com/channel/UCaPBjmrAYO6p-ksHNaymwLg?view_as=subscriber
+--	The script is distributed freely, provided that the author of the script is indicated - BERKYT
+--	Tutorial: https://www.youtube.com/watch?v=PY-KsR1P6l0&feature=youtu.be
+--=================================================================================================================================================================
+
+import("ScarUtil.scar")
+import("WXPScarUtil.scar")
+
+
+function OnGameSetup()
+	local max = 999
+	g_Player3 = World_GetPlayerAt(2)
+	g_table_players = 
+	{
+	}	
+	g_table_sgroup_players = 
+	{
+	}
+	------------------------------------------------------------------------Interface:
+		--NEW[07.01.2022]!
+		--[
+			-- Table of enemy army
+			g_table_warriors =
+			{
+				--Config enemy army
+				waves = 
+				{
+					--Config wave
+					wave_1 = 
+					{
+						--Type of warriors
+						type_one =
+						{
+							"ork_squad_grot", -- Type of warrior
+							15, -- Quantity of squads in the type
+							max, -- Quantity of warriors in the squad
+							{"default", 0}, -- Add weapons {type, quantity }  
+							leader = false -- Add leader
+						},
+						--Type of warriors
+						type_two =
+						{
+							"ork_squad_slugga", -- Type of warrior
+							1, -- Quantity of squads in the type
+							5, -- Quantity of warriors in the squad
+							{"default", 0}, -- Add weapons {type, quantity }  
+							leader = true -- Add leader
+						},
+						--Type of warriors
+						type_three =
+						{
+							"ork_squad_shoota_boy", -- Type of warrior
+							1, -- Quantity of squads in the type
+							4, -- Quantity of warriors in the squad
+							{"ork_big_shoota_shoota", max}, -- Add weapons {type, quantity }  
+							leader = true -- Add leader
+						},
+					},
+					--Config wave
+					wave_2 =
+					{
+						--Type of warriors
+						type_one =
+						{
+							"ork_squad_shoota_boy", -- Type of warrior
+							3, -- Quantity of squads in the type
+							max, -- Quantity of warriors in the squad
+							{"ork_big_shoota_shoota", max}, -- Add weapons {type, quantity }  
+							leader = true -- Add leader
+						},
+						--Type of warriors
+						type_two =
+						{
+							"ork_squad_slugga", -- Type of warrior
+							5, -- Quantity of squads in the type
+							max, -- Quantity of warriors in the squad
+							{"default", 0}, -- Add weapons {type, quantity }  
+							leader = true -- Add leader
+						},
+					},
+					--Config wave
+					wave_3 = 
+					{
+						--Type of warriors
+						type_one =
+						{
+							"ork_squad_grot", -- Type of warrior
+							35, -- Quantity of squads in the type
+							max, -- Quantity of warriors in the squad
+							{"default", 0}, -- Add weapons {type, quantity }  
+							leader = false -- Add leader
+						},
+						--Type of warriors
+						type_two =
+						{
+							"ork_squad_slugga", -- Type of warrior
+							5, -- Quantity of squads in the type
+							max, -- Quantity of warriors in the squad
+							{"default", 0}, -- Add weapons {type, quantity }  
+							leader = true -- Add leader
+						},
+						--Type of warriors
+						type_three =
+						{
+							"ork_squad_shoota_boy", -- Type of warrior
+							3, -- Quantity of squads in the type
+							max, -- Quantity of warriors in the squad
+							{"ork_big_shoota_shoota", max}, -- Add weapons {type, quantity }  
+							leader = true -- Add leader
+						},
+					},
+					--Config wave
+					wave_4 = 
+					{
+						--Type of warriors
+						type_one =
+						{
+							"ork_squad_grot", -- Type of warrior
+							35, -- Quantity of squads in the type
+							max, -- Quantity of warriors in the squad
+							{"default", 0}, -- Add weapons {type, quantity }  
+							leader = false -- Add leader
+						},
+						--Type of warriors
+						type_two =
+						{
+							"ork_squad_slugga", -- Type of warrior
+							5, -- Quantity of squads in the type
+							max, -- Quantity of warriors in the squad
+							{"default", 0}, -- Add weapons {type, quantity }  
+							leader = true -- Add leader
+						},
+						--Type of warriors
+						type_three =
+						{
+							"ork_squad_shoota_boy", -- Type of warrior
+							3, -- Quantity of squads in the type
+							max, -- Quantity of warriors in the squad
+							{"ork_big_shoota_shoota", max}, -- Add weapons {type, quantity }  
+							leader = true -- Add leader
+						},
+						--Type of warriors
+						type_three =
+						{
+							"ork_squad_shoota_boy", -- Type of warrior
+							3, -- Quantity of squads in the type
+							1, -- Quantity of warriors in the squad
+							{"ork_squad_killa_kan", max}, -- Add weapons {type, quantity }  
+							leader = false -- Add leader
+						},
+					},
+				},
+				-- WARNING! SKIP PLAYER NUMBER THREE! BECAUSE HE IS ENEMY!
+				-- Table of reinforcements
+				reinforcements = 
+				{	
+					--Config reinforcements for player 1 
+					reinforcement_to_player_1 =
+					{
+						--Type of warriors
+						type_one =
+						{
+							"tau_pathfinder_squad_advance_sp", -- Type of warrior
+							3, -- Quantity of squads in the type
+							max, -- Quantity of warriors in the squad
+						},
+						--Type of warriors
+						type_two =
+						{
+							"tau_drone_harbinger_squad_advance_sp", -- Type of warrior
+							1, -- Quantity of squads in the type
+							max, -- Quantity of warriors in the squad
+						},
+						--Type of warriors
+						type_three =
+						{
+							"tau_hammerhead_gunship_squad_advance_sp", -- Type of warrior
+							1, -- Quantity of squads in the type
+							1, -- Quantity of warriors in the squad
+						},
+					},	
+					--Config reinforcements for player 1 
+					reinforcement_to_player_2 =
+					{
+						--Type of warriors
+						type_one =
+						{
+							"tau_pathfinder_squad_advance_sp", -- Type of warrior
+							3, -- Quantity of squads in the type
+							max, -- Quantity of warriors in the squad
+						},
+						--Type of warriors
+						type_two =
+						{
+							"tau_drone_harbinger_squad_advance_sp", -- Type of warrior
+							1, -- Quantity of squads in the type
+							max, -- Quantity of warriors in the squad
+						},
+						--Type of warriors
+						type_three =
+						{
+							"tau_hammerhead_gunship_squad_advance_sp", -- Type of warrior
+							1, -- Quantity of squads in the type
+							1, -- Quantity of warriors in the squad
+						},					
+					},	
+				}
+			}
+			
+			--Set team color of enemy
+			local team_color_enemy = "default_2"
+			
+			--Race of waves
+			local name_race_enemy = "BERKYT"
+			local type_race_enemy = "ork_race"
+		--]
+		
+		
+		--Count point attack
+		g_attack_point = 3
+		
+		--Interval between attacks in seconds
+		g_interval = 90
+		
+		--Interval between reinforcement in seconds
+		g_t_interval_reinforcement = 5 * 60
+		
+		--ONLY FOR TEST'S BATTLES
+		Debug_mod = false 
+	------------------------------------------------------------------------End.
+	
+	--Don't touch:
+	--{
+		Setup_Player(2, name_race_enemy, type_race_enemy, 1)
+		Misc_PlayerTeamColor(g_Player3, team_color_enemy)
+	--}
+end
+
+--Don't touch:
+--{
+function OnInit()
+	Rule_AddOneShot(Advertising, 15)
+	
+	Rule_AddInterval(bm_CreateWaves, 1)
+	Rule_AddInterval(bm_SpawnReinforcement, 1)
+	Rule_AddInterval(bm_Timer, 1)
+end
+
+Scar_AddInit(OnInit)
+
+function Advertising()
+	local rand_ad = World_GetRand(0, 4)
+	
+	if rand_ad == 0 then
+		Sberbank()
+	elseif rand_ad == 1 then 
+		VKontakte()
+	elseif rand_ad == 2 then
+		Site_En_Link()
+	elseif rand_ad == 3 then 
+		Site_En()
+	elseif rand_ad == 4 then 
+		WebMoney()
+	end
+end
+
+function WebMoney()
+	Util_MissionTitle("WebMoney: R515364081475(RUB) or Z262863085617(USD)(Check ReadMe - file)")
+end
+
+function Sberbank()
+	Util_MissionTitle("If you want to thank the author for the script, then here's how to do it: Sberbank: 5469 4000 2976 6750 (Check ReadMe - file)")
+end
+
+function VKontakte()
+	Util_MissionTitle("VKontakte: https://vk.com/club177090833 (Check ReadMe - file)")
+end
+
+function Site_En_Link()
+	Util_MissionTitle("Visit my website and receive exclusive information! Link: http://bit.ly/3glPSP7")
+end
+
+function Site_En()
+	Util_MissionTitle("Visit my website and receive exclusive information!(Check ReadMe - file)")
+end
+--}

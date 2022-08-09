@@ -1,0 +1,223 @@
+--=================================================================================================================================================================
+--	Script By: BERKYT
+--	Links: VK: https://vk.com/b_e_r_k_y_t Discord: https://discord.gg/amMreCC YouTube: https://www.youtube.com/channel/UCaPBjmrAYO6p-ksHNaymwLg?view_as=subscriber
+--	The script is distributed freely, provided that the author of the script is indicated - BERKYT
+--	Tutorial: https://www.youtube.com/watch?v=PY-KsR1P6l0&feature=youtu.be
+--=================================================================================================================================================================
+
+import("ScarUtil.scar")
+import("WXPScarUtil.scar")
+
+
+function OnGameSetup()
+	local max = 999
+	g_Player3 = World_GetPlayerAt(2)
+	g_table_players = 
+	{
+	}	
+	g_table_sgroup_players = 
+	{
+	}
+	------------------------------------------------------------------------Interface:
+		--NEW[05.01.2022]!
+		--[
+			--List races: 
+			--[[race = {
+					"chaos_marine_race",
+					"eldar_race",
+					"guard_race",
+					"necron_race",
+					"ork_race",
+					"space_marine_race",
+					"tau_race",
+					"dark_eldar_race",
+					"sisters_race"
+					}
+			--]]	
+			
+			--You can add to this table all player except World_GetPlayerAt(2)!! 
+			--DON'T USE "g_table_players.player_3 = World_GetPlayerAt(2)" BECAUSE HE ALREADY INITIALIZED AS "g_Player3" AND USE ON SCRIPT!
+			g_table_players.player_1 = World_GetPlayerAt(0)
+			g_table_players.player_2 = World_GetPlayerAt(1)
+			
+			-- Table of enemy army
+			g_table_warriors =
+			{
+				--Config enemy army
+				waves = 
+				{
+					--Config wave
+					wave_1 = 
+					{
+						--Type of warriors
+						type_one =
+						{
+							"ork_squad_grot", -- Type of warrior
+							3, -- Quantity of squads in the type
+							10, -- Quantity of warriors in the squad
+							{"default", 0}, -- Add weapons
+							leader = false -- Add leader
+						},
+						--Type of warriors
+						type_two =
+						{
+							"ork_squad_slugga", -- Type of warrior
+							1, -- Quantity of squads in the type
+							5, -- Quantity of warriors in the squad
+							{"default", 0}, -- Add weapons
+							leader = true -- Add leader
+						},
+						--Type of warriors
+						type_three =
+						{
+							"ork_squad_shoota_boy", -- Type of warrior
+							1, -- Quantity of squads in the type
+							1, -- Quantity of warriors in the squad
+							{"ork_big_shoota_shoota", max}, -- Add weapons
+							leader = true -- Add leader
+						},
+						--Type of warriors
+						type_four =
+						{
+							"ork_squad_shoota_boy", -- Type of warrior
+							1, -- Quantity of squads in the type
+							1, -- Quantity of warriors in the squad
+							{"default", 0}, -- Add weapons
+							leader = true -- Add leader
+						},
+					},
+					--Config wave
+					wave_2 =
+					{
+						--Type of warriors
+						type_one =
+						{
+							"ork_squad_shoota_boy", -- Type of warrior
+							3, -- Quantity of squads in the type
+							max, -- Quantity of warriors in the squad
+							{"ork_big_shoota_shoota", max}, -- Add weapons
+							leader = true
+						},
+					},
+					--Config wave
+					wave_3 =
+					{
+						--Type of warriors
+						type_one =
+						{
+							"ork_squad_shoota_boy", -- Type of warrior
+							3, -- Quantity of squads in the type
+							max, -- Quantity of warriors in the squad
+							{"ork_big_shoota_shoota", max}, -- Add weapons
+							leader = true
+						},
+					},
+					--Config wave
+					wave_4 =
+					{
+						--Type of warriors
+						type_one =
+						{
+							"ork_squad_shoota_boy", -- Type of warrior
+							3, -- Quantity of squads in the type
+							max, -- Quantity of warriors in the squad
+							{"ork_big_shoota_shoota", max}, -- Add weapons
+							leader = true
+						},
+					},
+				},
+				-- WARNING! SKIP PLAYER NUMBER THREE! BECAUSE HE IS ENEMY!
+				-- Table of reinforcements
+				reinforcements = 
+				{	
+					--Config reinforcements for player 1 
+					reinforcement_to_player_1 =
+					{
+						--Type of warriors
+						type_one =
+						{
+							"guard_squad_guardsmen_advance_sp", -- Type of warrior
+							3, -- Quantity of squads in the type
+							max, -- Quantity of warriors in the squad
+						},
+						--Type of warriors
+						type_two =
+						{
+							"guard_squad_kasrkin_advance_sp", -- Type of warrior
+							1, -- Quantity of squads in the type
+							max, -- Quantity of warriors in the squad
+						},
+					},
+					--Config reinforcements for player 1 
+					reinforcement_to_player_2 = 
+					{
+						--Type of warriors
+						type_one =
+						{
+							"space_marine_squad_tactical", -- Type of warrior
+							3, -- Quantity of squads in the type
+							max, -- Quantity of warriors in the squad
+						},
+						--Type of warriors
+						type_two =
+						{
+							"space_marine_squad_terminator_assault", -- Type of warrior
+							1, -- Quantity of squads in the type
+							1, -- Quantity of warriors in the squad
+						},
+					}
+				}
+			}
+			
+			--Set team color of enemy
+			local team_color_enemy = "default_2"
+			
+			--Race of waves
+			local name_race_enemy = "BERKYT"
+			local type_race_enemy = "ork_race"
+		--]
+		
+		
+		--Count point attack
+		g_attack_point = 3
+		
+		--Interval between attacks in seconds
+		g_interval = 0
+		
+		--Interval between reinforcement in seconds
+		g_t_interval_reinforcement = 5
+		
+		--ONLY FOR TEST'S BATTLES
+		Debug_mod = true 
+	------------------------------------------------------------------------End.
+	
+	--Don't touch:
+	--{
+		Setup_Player(2, name_race_enemy, type_race_enemy, 1)
+		Misc_PlayerTeamColor(g_Player3, team_color_enemy)
+	--}
+end
+
+--Don't touch:
+--{
+function OnInit()
+	bm_Test() -- ONLY FOR TEST'S BATTLES
+	bm_SetSGroupOfReinforcementsFromTable()
+	
+	Cpu_Enable(g_Player3, false)
+
+	Rule_Add(bm_Rule_EndGameLose)
+	
+	Rule_AddInterval(bm_CreateWaves, 1)
+	Rule_AddInterval(bm_SpawnReinforcement, 1)
+	Rule_AddInterval(bm_Timer, 1)
+	
+	Rule_AddOneShot(Site_En, 15)
+end
+
+Scar_AddInit(OnInit)
+
+function Site_En()
+	Util_MissionTitle("Visit my website and receive exclusive information!(Check ReadMe - file)")
+end
+--}

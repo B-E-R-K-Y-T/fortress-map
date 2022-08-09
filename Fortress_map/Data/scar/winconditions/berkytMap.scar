@@ -1,0 +1,560 @@
+--=================================================================================================================================================================
+--	Berkyt's Map Win Condition
+--	By BERKYT
+--	Links: VK: https://vk.com/b_e_r_k_y_t Discord: https://discord.gg/amMreCC YouTube: https://www.youtube.com/channel/UCaPBjmrAYO6p-ksHNaymwLg?view_as=subscriber
+--	The script is distributed freely, provided that the author of the script is indicated - BERKYT 
+--=================================================================================================================================================================
+
+function bm_OnGameSetup()
+	for i=1, World_GetPlayerCount() do
+		if i ~= 3 then 
+			g_table_players["player_"..i] = World_GetPlayerAt(i-1)
+		end
+	end
+	
+	g_count_ad = 1
+	
+	g_table_sgroup_enemies = 
+	{
+	}	
+	g_table_squad_stuck = 
+	{
+	}	
+	g_table_squad_reinforcement_timers = 
+	{
+	}
+	
+	--Timer
+	g_timer_wave = 0
+	g_timer_re = 0
+	g_timer_to_win = -1
+	g_interval_squad_stuck = 0
+	g_time_squad_stuck = 0
+	
+	--Waves
+	g_num_waves = 1
+	g_number_wave = 0 
+	
+	--Music
+	g_id_track = nil
+	g_check_music_playing = false
+	
+	g_check_wave_alive = false
+end
+
+function bm_init()
+	print("<Berkyt's Map> Initing Berkyt's Map Scar... ")
+	bm_OnGameSetup()
+	bm_Test()
+	bm_deleteHq()
+	bm_Start_map()
+	bm_SetSGroupOfWavesFromTable()
+	bm_CreateTableTimersSquadStuck()
+	bm_CreateTableTimersReinforcement()
+	bm_SetSGroupOfReinforcementsFromTable()
+	
+	Cpu_Enable(g_Player3, false)
+	
+	Rule_Add(bm_Rule_EndGameWin)
+	Rule_Add(bm_Rule_EndGameLose)
+
+	Rule_AddOneShot(bm_Sberbank, 30)
+	
+	Rule_AddInterval(bm_Advertising, 7 * 60)
+	Rule_AddInterval(bm_CheckingEndWave, 1)
+	print("<Berkyt's Map> Success")
+end
+
+Scar_AddInit(bm_init)
+
+function bm_Start_map()
+	Fade_Start(5, true)
+	Util_MissionTitle("By: BERKYT")
+end
+
+-- This function created by SWayfarer
+function bm_deleteHq()
+	local i1 = 0
+	local eg = "rjgrfjlrefvrfgftgb"
+	local sg = "brjrfgbkfgnf3243re"
+	
+	if (Marker_Exists("mkr_BERKYT_script_deleteEntities", "basic_marker")) then
+		for i1 = 1, World_GetPlayerCount() do
+			Player_GetAllEntitiesNearMarker(World_GetPlayerAt(i1 - 1), eg, "mkr_BERKYT_script_deleteEntities")
+			
+			EGroup_DestroyAllEntities(eg)
+			EGroup_Destroy(eg)
+		end
+	else
+		print("<Berkyt's Map> (Error) Can't remove entities because special marker not exists!")
+	end
+	
+	if (Marker_Exists("mkr_BERKYT_script_deleteSquads", "basic_marker")) then
+		for i1 = 1, World_GetPlayerCount() do
+			
+			Player_GetAllSquadsNearMarker(World_GetPlayerAt(i1 - 1), sg, "mkr_BERKYT_script_deleteSquads")
+			
+			SGroup_DestroyAllSquads(sg)
+			SGroup_Destroy(sg)
+		end
+	else
+		print("<Berkyt's Map> (Error) Can't remove squads because special marker not exists!")
+	end
+end
+--
+
+function bm_Advertising()
+	if(g_count_ad == 1) then
+		bm_Site_En()
+	elseif(g_count_ad == 2) then
+		bm_VKontakte()
+	elseif(g_count_ad == 3) then
+		bm_Sberbank()
+	elseif(g_count_ad == 4) then
+		bm_WebMoney()
+		g_count_ad = 0
+	end
+	
+	g_count_ad = g_count_ad + 1
+end
+
+function bm_WebMoney()
+	Util_MissionTitle("If you want to thank the author for the script, then here's how to do it: WebMoney: R515364081475(RUB) or Z262863085617(USD)(Check ReadMe - file)")
+end
+
+function bm_Sberbank()
+	Util_MissionTitle("If you want to thank the author for the script, then here's how to do it: Sberbank: 5469 4000 2976 6750 (Check ReadMe - file)")
+end
+
+function bm_VKontakte()
+	Util_MissionTitle("VKontakte: https://vk.com/club177090833 (Check ReadMe - file)")
+end
+
+function bm_Site_En()
+	if World_GetRand(0, 1) == 1 then
+		Util_MissionTitle("Visit my website and receive exclusive information!(Check ReadMe - file)")
+	else
+		Util_MissionTitle("Visit my website and receive exclusive information! Link: http://bit.ly/3glPSP7")
+	end
+end
+
+function bm_Site_Ru()
+	Util_MissionTitle("???????? ??? ???? ? ????????? ???????????? ??????????!(????????? 'ReadMe' - ????)")
+end
+
+function bm_Print(...)
+	local line = ""
+	
+	for i = 1, arg.n do
+		line = line .. " " ..tostring(arg[i])
+	end
+	
+	print("<Debug message> { "..line.." }")
+end
+
+function bm_LengthTable(table)
+	local len = 0
+	
+	if type(table) == "table" then
+		for _ in table do
+			len = len + 1
+		end
+		
+		return tonumber(len)
+	else
+		return nil
+	end
+end
+
+function bm_TurnOnMusicWhenAttack(player)
+	local name_race = Player_GetRaceName(player)
+	local table_playlist = 
+	{
+		["chaos_marine_race"] = 
+		{
+			"MU_IG_STR_Chaos", "MU_IG_STR_Chaos_perc", "MU_IG_STR_Chaos_perc_brass", 
+			"MU_IG_STR_Chaos_perc_str", "MU_IG_STR_Chaos_perc_voice"
+		},
+		["eldar_race"] = 
+		{
+			"MU_IG_STR_Eldar", "MU_IG_STR_Eldar_perc", 
+			"MU_IG_STR_Eldar_perc_brass", "MU_IG_STR_Eldar_perc_str"
+		},
+		["guard_race"] = 
+		{	
+			"MU_IG_STR_ImpGd_perc_brass", "MU_IG_STR_ImpGd", "MU_IG_STR_ImpGd_perc",
+			"MU_IG_STR_ImpGd_perc_str", "MU_IG_STR_ImpGd_perc_voice"
+		},
+		["necron_race"] = 
+		{
+			"MU_IG_THEME_Nightbringer", "MU_IG_STR_Necron", "MU_IG_STR_Necron_perc", 
+			"MU_IG_STR_Necron_perc_brass", "MU_IG_STR_Necron_perc_str"
+		},
+		["ork_race"] = 
+		{
+			"MU_IG_STR_Ork", "MU_IG_STR_Ork_perc", "MU_IG_STR_Ork_perc_str", 
+			"MU_IG_STR_Ork_perc_brass", "music_msd5o", "music_msd1" 
+		},
+		["space_marine_race"] = 
+		{
+			"MU_IG_STR_SpaceMarine", "MU_IG_STR_SpaceMarine_perc", 
+			"MU_IG_STR_SpaceMarine_perc_brass", "MU_IG_STR_SpaceMarine_perc_str"
+		},
+		["tau_race"] = 
+		{
+			"MU_IG_STR_Tau", "MU_IG_RAC_Tau", "MU_IG_STR_Tau_perc", 
+			"MU_IG_STR_Tau_perc_str", "MU_IG_STR_Tau_perc_brass"
+		},
+		["dark_eldar_race"] = 
+		{
+			"MU_IG_STR_darkeldar_perc_str", "MU_IG_STR_darkeldar", 
+			"MU_IG_STR_darkeldar_perc", "MU_IG_STR_darkeldar_perc_brass"
+		},
+		["sisters_race"] = 
+		{
+			"mu_ig_str_sisters", "mu_ig_str_sisters_perc_str", "mu_ig_str_sisters_perc_voice"
+		},
+		["default"] = 
+		{
+			"MU_IG_STR_Tau", "MU_IG_STR_Chaos", "MU_IG_STR_Eldar", 
+			"MU_IG_STR_ImpGd_perc_brass", "MU_IG_THEME_Nightbringer",
+			"MU_IG_STR_Ork", "MU_IG_STR_SpaceMarine", "MU_IG_STR_darkeldar_perc_str", "mu_ig_str_sisters"
+		}
+	}
+	
+	for key in table_playlist do
+		if key == name_race then
+			Sound_PlaylistPlayNow(PC_Music, table_playlist[key][World_GetRand(1, bm_LengthTable(table_playlist[key]))])
+			g_check_music_playing = true
+			
+			return
+		end
+	end
+	
+	Sound_PlaylistPlayNow(PC_Music, table_playlist["default"][World_GetRand(1, bm_LengthTable(table_playlist["default"]))])
+end
+
+function bm_Rule_EndGameWin()
+	if g_num_waves > bm_LengthTable(g_table_warriors.waves) and 
+		bm_SGroup_GetAvgHealthFromTable(sg_table_type_unit) <= 0 
+	then
+		World_SetGameOver()
+	end 
+end
+
+function bm_Rule_EndGameLose()
+	local building_exceptions = 
+	{
+		"chaos_armoury",
+		"chaos_listening_post",
+		"chaos_mine_field",
+		"chaos_plasma_generator",
+		"chaos_thermo_plasma_generator",
+		"chaos_turret_bolter",
+		
+		"eldar_advanced_warp_generator",
+		"eldar_listening_post",
+		"eldar_mine_field",
+		"eldar_soul_shrine",
+		"eldar_support_platform_scatterlaser",
+		"eldar_warp_generator",
+		
+		"ork_bigger_generator",
+		"ork_generator",
+		"ork_gork_totem",
+		"ork_mine_field",
+		"ork_pile_o_guns",
+		"ork_waagh_banner",
+		
+		"space_marine_armoury",
+		"space_marine_generator",
+		"space_marine_listening_post",
+		"space_marine_mine_field",
+		"space_marine_turret_bolter",
+		"space_marine_thermo_generator",
+		
+		"guard_listening_post",
+		"guard_mines",
+		"guard_plasma_generator",
+		"guard_tactica",
+		"guard_thermo_plasma",
+		"guard_turret_heavy_bolter",
+		
+		"necron_listening_post",
+		"necron_summoning_core",
+		"necron_plasma_generator",
+		"necron_energy_core",
+		"necron_greater_summoning_core",
+		"necron_forbidden_archive",
+		"necron_thermoplasma_generator",
+		"necron_turret",
+		
+		"tau_listening_post",
+		"tau_research_building",
+		"tau_shrine_of_kauyon",
+		"tau_shrine_of_montka",
+		"tau_shrine_of_purpose",
+		"tau_thermoplasma_generator",
+		"tau_turret_sp",	
+		"tau_plasma_generator",
+		
+		"sisters_thermo_plasma",
+		"sisters_plasma_generator",
+		"sisters_turret_flamer",
+		"sisters_holy_reliquary",
+		"sisters_listening_post",
+		"sisters_mines",
+		"sisters_sanctuary",
+		
+		"dark_eldar_haemonculus_laboratory",
+		"dark_eldar_listening_post",
+		"dark_eldar_plasma_generator",
+		"dark_eldar_slave_caravel",
+		"dark_eldar_soul_cage",
+		"dark_eldar_thermo_plasma",
+		"dark_eldar_wych_cult_arena"
+	}
+
+	for key, player in pairs(g_table_players) do
+		if Player_IsAlive(player) then
+			if Player_HasBuildingsExcept(player, building_exceptions) == false then
+				Player_Kill(player)
+			end
+		end
+	end
+end
+
+function bm_CreateTableTimersSquadStuck()
+	for key_wave, table_waves in pairs(g_table_warriors.waves) do
+		g_table_squad_stuck[key_wave] = {}
+		
+		for key in table_waves do
+			g_table_squad_stuck[key_wave][key] = 0
+			--bm_Print(g_table_squad_stuck[key_wave][key])
+		end
+	end
+end
+
+function bm_CreateTableTimersReinforcement()
+	for player in g_table_players do
+		g_table_squad_reinforcement_timers[player] = 0
+		--bm_Print("g_table_squad_reinforcement_timers[player] =",g_table_squad_reinforcement_timers[player])
+	end
+end
+
+function bm_CheckingSquadStuck(key_wave, key_type, sg_wave_troops_team)
+	local time_wait = 90
+	
+	SGroup_CreateIfNotFound(sg_wave_troops_team)
+	
+	if SGroup_IsUnderAttack(sg_wave_troops_team, false) == false then
+		g_table_squad_stuck[key_wave][key_type] = g_table_squad_stuck[key_wave][key_type] + 1
+		--bm_Print(g_table_squad_stuck[key_wave][key_type])
+		
+		if g_table_squad_stuck[key_wave][key_type] >= time_wait then
+			SGroup_DestroyAllSquads(sg_wave_troops_team)
+			g_table_squad_stuck[key_wave][key_type] = 0
+		end
+	else
+		g_table_squad_stuck[key_wave][key_type] = 0
+	end		
+end
+
+function bm_SearchForAPlayerInTableByIndex(var)
+	for key in g_table_players do
+		local int_key = tonumber(string.sub(tostring(key), 8))
+		
+		if int_key == var then
+			return g_table_players[key]
+		end
+	end
+end
+
+function bm_Timer()
+	sg_table_type_unit = g_table_sgroup_enemies["wave_"..g_number_wave + 1]
+	
+	if g_number_wave ~= 0 then
+		sg_table_type_unit = g_table_sgroup_enemies["wave_"..g_number_wave]
+	end
+	
+	if bm_SGroup_GetAvgHealthFromTable(sg_table_type_unit) <= 0 then
+		g_timer_wave = g_timer_wave + 1
+		--bm_Print("g_timer_wave = ", g_timer_wave)
+		
+		if g_timer_wave > g_interval + 1 then
+			g_timer_wave = 0
+		end 
+	end
+	
+	for player in g_table_sgroup_players do
+		SGroup_CreateIfNotFound(g_table_sgroup_players[player])
+		
+		if SGroup_GetAvgHealth(g_table_sgroup_players[player]) <= 0 then
+			
+			g_table_squad_reinforcement_timers[player] = g_table_squad_reinforcement_timers[player] + 1
+			--bm_Print("g_table_squad_reinforcement_timers[player] =",g_table_squad_reinforcement_timers[player])
+			if g_table_squad_reinforcement_timers[player] > g_t_interval_reinforcement + 1 then
+				g_table_squad_reinforcement_timers[player] = 0
+			end 
+		end
+	end
+end
+
+function bm_SetSGroupOfWavesFromTable()
+	for key_wave, table_waves in pairs(g_table_warriors.waves) do
+		g_table_sgroup_enemies[key_wave] = {}
+		
+		for key in table_waves do
+			g_table_sgroup_enemies[key_wave][key] = "sg_Attack_Warriors_"..key
+			SGroup_CreateIfNotFound("sg_Attack_Warriors_"..key)
+		end
+	end
+end
+
+function bm_SetSGroupOfReinforcementsFromTable()
+	for item in g_table_players do
+		g_table_sgroup_players[item] = "sg_Reinforcements_Warriors_"..string.sub(tostring(item), 8)
+	end
+end
+
+function bm_SGroup_GetAvgHealthFromTable(table_wave)
+	local sum_health = 0
+	
+	for key in table_wave do
+		sum_health = sum_health + SGroup_GetAvgHealth(table_wave[key])
+	end
+	
+	--bm_Print("sum_health=", sum_health)
+	return sum_health
+end
+
+function bm_CheckingEndWave()
+	local sg_table_type_unit = g_table_sgroup_enemies["wave_"..g_number_wave + bm_SmartIncrement()]
+
+	if bm_SGroup_GetAvgHealthFromTable(sg_table_type_unit) <= 0 and g_check_wave_alive then
+		g_check_wave_alive = false
+		
+		Util_MissionTitle("You did it! But it's too early to relax. A new attack is about to begin!")
+	end
+end
+
+function bm_SGroup_IsEmptyTable(table_wave)
+	local sum_health = 0
+	
+	for key in table_wave do
+		if SGroup_IsEmpty(table_wave[key]) then
+			return true
+		end
+	end
+	
+	return false
+end
+
+function bm_SmartIncrement()
+	local increment = 0
+	
+	if g_number_wave == 0 then
+		increment = increment + 1
+		
+		return increment
+	end
+	
+	return increment
+end
+
+function bm_CreateWaves()
+	sg_table_type_unit = g_table_sgroup_enemies["wave_"..g_number_wave + bm_SmartIncrement()]
+	
+	if bm_SGroup_GetAvgHealthFromTable(sg_table_type_unit) > 0 then
+		for key_type in sg_table_type_unit do
+			bm_CheckingSquadStuck("wave_"..g_number_wave + bm_SmartIncrement(), key_type, sg_table_type_unit[key_type])
+		end
+	end
+	
+	if g_timer_wave >= g_interval and 
+		bm_SGroup_IsEmptyTable(sg_table_type_unit) and 
+		bm_SGroup_GetAvgHealthFromTable(sg_table_type_unit) <= 0 
+	then
+		g_timer_wave = 0
+		g_check_wave_alive = true
+		bm_TurnOnMusicWhenAttack(g_Player3)
+		
+		Util_MissionTitle("Wave number "..g_num_waves)
+		
+		if bm_SGroup_GetAvgHealthFromTable(sg_table_type_unit) <= 0 then
+			for key_wave, table_types in pairs(g_table_warriors.waves) do
+				if type(table_types) == "table" and tonumber(string.sub(key_wave, 6)) == g_num_waves then
+					for key_j, table_items in pairs(table_types) do
+						Util_CreateSquadsAtMarkerEx(g_Player3, g_table_sgroup_enemies[key_wave][key_j], 
+													table_items[1], "mkr_wave_"..World_GetRand(1, g_attack_point), 
+													table_items[2], 
+													table_items[3])
+							
+						if table_items[4][1] ~= "default" or table_items[4][2] ~= nil then
+							Squad_ForceUpgradeWeapons(
+								SGroup_GetSpawnedSquadAt(
+									SGroup_FromName(g_table_sgroup_enemies[key_wave][key_j]), 1), 
+									table_items[4][1], 
+									table_items[4][2])
+						end
+						
+						if table_items[5] then
+							SGroup_AddLeaders(g_table_sgroup_enemies[key_wave][key_j])
+						end
+						
+						Cmd_AttackMoveMarker(g_table_sgroup_enemies[key_wave][key_j], 
+						"mkr_to_player_"..World_GetRand(1, bm_LengthTable(g_table_players)))
+					end
+				end
+			end
+		end
+		
+		g_num_waves = g_num_waves + 1
+		g_number_wave = g_number_wave + 1
+	end
+end
+
+function bm_SpawnReinforcement()	
+	--bm_Print("g_table_squad_reinforcement_timers[player] =",g_table_squad_reinforcement_timers[player])	
+	for player in g_table_players do
+		local num_player = tonumber(string.sub(tostring(player), 8))
+		
+		if  num_player > 3 then
+			num_player = num_player - 1
+		end
+		
+		if g_table_squad_reinforcement_timers[player] == g_t_interval_reinforcement then
+			g_table_squad_reinforcement_timers[player] = 0
+			SGroup_CreateIfNotFound(g_table_sgroup_players[player])
+			
+			if SGroup_IsEmpty(g_table_sgroup_players[player]) and SGroup_GetAvgHealth(g_table_sgroup_players[player]) <= 0 then 
+				for key_i, table_i in pairs(g_table_warriors.reinforcements) do
+					if bm_SearchForAPlayerInTableByIndex(
+						tonumber(string.sub(tostring(key_i), 25))) == g_table_players[player] 
+					then
+						for key_j, table_j in pairs(table_i) do
+							bm_Print(g_table_players[player], g_table_sgroup_players[player])
+							Util_CreateSquadsAtMarkerEx(g_table_players[player], g_table_sgroup_players[player], 
+														table_j[1], "mkr_reinforcement_"..num_player, 
+														table_j[2], 
+														table_j[3])
+						end
+						
+						SGroup_AddLeaders(g_table_sgroup_players[player])
+					end
+				end	
+				
+				Ping_Marker ("mkr_reinforcement_"..num_player, false)
+				Util_MissionTitle("Reinforcements have arrived!")
+			end
+		end
+	end
+end
+
+function bm_Test()
+	if Debug_mod then 
+		FOW_RevealAll()
+		Util_CreateSquadsAtMarkerEx(g_table_players.player_1, 
+		"230948720398414887023984723094781811520", "guard_squad_baneblade", "mkr_to_player_1", 4, 1)
+	end
+end

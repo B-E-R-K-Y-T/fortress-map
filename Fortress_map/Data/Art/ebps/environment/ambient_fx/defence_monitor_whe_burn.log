@@ -1,0 +1,13 @@
+21:12:50.36   BURNER_0 started at 2015-12-15 21:12
+21:12:50.36   OS NT 6.1, 0MB Physical Memory
+21:12:50.36   RUN-OPTIONS 
+21:12:50.36   WORKING-DIR E:\Games\DarkCrusade\unlocker\ModTools
+21:12:50.36   USER GuiltyPo
+21:12:50.36   
+21:12:50.36   SPOOGE - Driver[Null] on adapter[1869438821], version[4,32]
+21:12:50.38   Frame '/games/darkcrusade/unlocker/modtools/datageneric/my_mod/art/ebps/environment/ambient_fx/defence_monitor': Duplicate Mesh resource 'statues_surface_a' added to inventory - please check the resource!
+21:12:50.38   Frame '/games/darkcrusade/unlocker/modtools/datageneric/my_mod/art/ebps/environment/ambient_fx/defence_monitor': Duplicate Mesh resource 'statues_surface_b' added to inventory - please check the resource!
+21:12:50.38   Frame '/games/darkcrusade/unlocker/modtools/datageneric/my_mod/art/ebps/environment/ambient_fx/defence_monitor': Duplicate Mesh resource 'statues_surface_c' added to inventory - please check the resource!
+21:12:50.38   Frame '/games/darkcrusade/unlocker/modtools/datageneric/my_mod/art/ebps/environment/ambient_fx/defence_monitor': Duplicate Mesh resource 'statues_surface_d' added to inventory - please check the resource!
+21:12:50.40   
+Application closed without errors
